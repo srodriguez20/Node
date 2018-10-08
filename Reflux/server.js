@@ -6,6 +6,32 @@ const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const open = require('open');
 
+const express = require('express');
+const http = require('http');
+const engine = require('socket.io');
+
+const request = require('request');
+
+const port = 3002;
+const app = express();
+
+let server = http.createServer(app).listen(port, ()=> {
+  console.log("port listening in "+port);
+});
+
+const io = engine.listen(server);
+
+io.on('connection',(socket)=>{
+  console.log('peticion conexion');
+  socket.on('ask',(ask)=>{
+    console.log('peticion realizada');
+    request('http://randomuser.me/api',(err,response, body)=>{
+      io.emit('persona',body);
+      console.log('respuesta realizada');
+    });
+  });
+});
+
 /**
  * Flag indicating whether webpack compiled for the first time.
  * @type {boolean}
